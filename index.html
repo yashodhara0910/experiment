@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello World — Futuristic Experience</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Theme 1: Aurora (Default) */
+            --bg-dark: #070913;
+            --accent-1: #7928CA;
+            --accent-2: #FF0080;
+            --accent-3: #00DFD8;
+            --text-main: #FFFFFF;
+            --text-muted: #A1A1AA;
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.76), 0 18px 36px -18px rgba(121, 40, 202, 0.35);
+            --font-primary: 'Outfit', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+        }
+
+        [data-theme="sunset"] {
+            --bg-dark: #0f051d;
+            --accent-1: #ff416c;
+            --accent-2: #ff4b2b;
+            --accent-3: #ffb347;
+            --card-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.76), 0 18px 36px -18px rgba(255, 75, 43, 0.35);
+        }
+
+        [data-theme="emerald"] {
+            --bg-dark: #03140e;
+            --accent-1: #00b09b;
+            --accent-2: #96c93d;
+            --accent-3: #00f2fe;
+            --card-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.76), 0 18px 36px -18px rgba(0, 176, 155, 0.35);
+        }
+
+        [data-theme="cyber"] {
+            --bg-dark: #080816;
+            --accent-1: #00f2fe;
+            --accent-2: #4facfe;
+            --accent-3: #0000fe;
+            --card-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.76), 0 18px 36px -18px rgba(0, 242, 254, 0.35);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            transition: background-color 0.6s ease;
+        }
+
+        /* Canvas background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Glowing background ambient lights */
+        .ambient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.5;
+            z-index: 1;
+            animation: orbFloat 12s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 450px;
+            height: 450px;
+            background: var(--accent-1);
+            top: -100px;
+            left: -100px;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: var(--accent-2);
+            bottom: -150px;
+            right: -100px;
+            animation-delay: -5s;
+        }
+
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: var(--accent-3);
+            top: 40%;
+            left: 60%;
+            animation-delay: -8s;
+            opacity: 0.3;
+        }
+
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(60px, 40px) scale(1.1); }
+            100% { transform: translate(-40px, 80px) scale(0.95); }
+        }
+
+        /* Perspective Wrapper */
+        .perspective-container {
+            perspective: 1200px;
+            z-index: 10;
+            padding: 20px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* Main Glass Card */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 48px 40px;
+            box-shadow: var(--card-shadow);
+            transform-style: preserve-3d;
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Shimmer gradient line on top border */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-3), var(--accent-2), var(--accent-1), transparent);
+            animation: borderShimmer 4s linear infinite;
+        }
+
+        @keyframes borderShimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Card Header / Status bar */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 18px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #10B981;
+            box-shadow: 0 0 12px #10B981;
+            animation: pulseDot 2s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.6; }
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 4px;
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .theme-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .theme-btn.active {
+            border-color: #ffffff;
+            transform: scale(1.15);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+        }
+
+        .theme-btn[data-set="aurora"] { background: linear-gradient(135deg, #7928CA, #FF0080); }
+        .theme-btn[data-set="sunset"] { background: linear-gradient(135deg, #ff416c, #ffb347); }
+        .theme-btn[data-set="emerald"] { background: linear-gradient(135deg, #00b09b, #96c93d); }
+        .theme-btn[data-set="cyber"] { background: linear-gradient(135deg, #00f2fe, #4facfe); }
+
+        /* Main Hero Section */
+        .hero-content {
+            text-align: center;
+            margin-bottom: 40px;
+            transform: translateZ(30px);
+        }
+
+        .welcome-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(90deg, rgba(121, 40, 202, 0.15), rgba(255, 0, 128, 0.15));
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            color: var(--accent-3);
+            margin-bottom: 24px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 8vw, 5.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 40%, var(--accent-3) 70%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            gap: 2px;
+            flex-wrap: wrap;
+        }
+
+        .hero-title span {
+            display: inline-block;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
+            cursor: pointer;
+        }
+
+        .hero-title span:hover {
+            transform: translateY(-12px) scale(1.15) rotate(4deg);
+            filter: drop-shadow(0 0 15px var(--accent-2));
+            -webkit-text-fill-color: var(--accent-3);
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .typewriter-text {
+            color: #FFFFFF;
+            font-weight: 600;
+            border-bottom: 2px solid var(--accent-2);
+            padding-bottom: 2px;
+        }
+
+        /* Action Buttons */
+        .action-group {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            transform: translateZ(40px);
+            margin-bottom: 40px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            color: #FFFFFF;
+            border: none;
+            padding: 16px 36px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: var(--font-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 10px 25px -5px var(--accent-1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg) translateY(-100%);
+            transition: transform 0.8s ease;
+        }
+
+        .btn-primary:hover::after {
+            transform: rotate(45deg) translateY(100%);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 15px 35px -5px var(--accent-2);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            color: #FFFFFF;
+            border: 1px solid var(--glass-border);
+            padding: 16px 28px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: var(--font-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: var(--glass-hover);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            transform: translateZ(20px);
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-3px);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.25rem;
+            color: var(--accent-3);
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            font-family: var(--font-code);
+        }
+
+        /* Code snippet box (Modal/Expandable) */
+        .code-box {
+            background: rgba(10, 12, 22, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin-top: 24px;
+            overflow: hidden;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .code-box.show {
+            display: block;
+        }
+
+        .code-header {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: var(--font-code);
+        }
+
+        .code-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #FF5F56; }
+        .dot-yellow { background: #FFBD2E; }
+        .dot-green { background: #27C93F; }
+
+        .code-body {
+            padding: 20px;
+            font-family: var(--font-code);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            color: #E2E8F0;
+            overflow-x: auto;
+        }
+
+        .code-keyword { color: #FF79C6; }
+        .code-string { color: #F1FA8C; }
+        .code-tag { color: #8BE9FD; }
+        .code-attr { color: #50FA7B; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(18, 20, 32, 0.9);
+            border: 1px solid var(--accent-3);
+            color: #FFFFFF;
+            padding: 14px 28px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 223, 216, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Responsive design */
+        @media (max-width: 640px) {
+            .glass-card {
+                padding: 32px 20px;
+                border-radius: 24px;
+            }
+
+            .hero-title {
+                font-size: 2.8rem;
+            }
+
+            .action-group {
+                flex-direction: column;
+            }
+
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dynamic Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Ambient Glow Orbs -->
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+
+    <!-- Main 3D Perspective Container -->
+    <div class="perspective-container">
+        <div class="glass-card" id="card">
+            
+            <!-- Header Bar -->
+            <div class="card-header">
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span>CREATIVE SYSTEM ONLINE</span>
+                </div>
+                
+                <div class="theme-selector" title="Select Aura Theme">
+                    <button class="theme-btn active" data-set="aurora" title="Cyber Aurora"></button>
+                    <button class="theme-btn" data-set="sunset" title="Sunset Flare"></button>
+                    <button class="theme-btn" data-set="emerald" title="Emerald Matrix"></button>
+                    <button class="theme-btn" data-set="cyber" title="Neon Cyber"></button>
+                </div>
+            </div>
+
+            <!-- Hero Main Content -->
+            <div class="hero-content">
+                <div class="welcome-pill">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>ELEGANT & POWERFUL</span>
+                </div>
+
+                <h1 class="hero-title" id="interactive-title">
+                    <span>H</span><span>e</span><span>l</span><span>l</span><span>o</span><span>,</span>&nbsp;<span>W</span><span>o</span><span>r</span><span>l</span><span>d</span><span>!</span>
+                </h1>
+
+                <p class="hero-subtitle">
+                    Welcome to your next-generation HTML landing template. 
+                    Crafted with interactive glassmorphism, dynamic glowing aura, and <span class="typewriter-text" id="typewriter">stunning aesthetics</span>.
+                </p>
+            </div>
+
+            <!-- Interactive Buttons -->
+            <div class="action-group">
+                <button class="btn-primary" id="btn-interact">
+                    <i class="fa-solid fa-sparkles"></i>
+                    <span>Trigger Magic Sparkles</span>
+                </button>
+                <button class="btn-secondary" id="btn-toggle-code">
+                    <i class="fa-solid fa-code"></i>
+                    <span>Inspect Code</span>
+                </button>
+                <button class="btn-secondary" id="btn-copy">
+                    <i class="fa-regular fa-copy"></i>
+                    <span>Copy Snippet</span>
+                </button>
+            </div>
+
+            <!-- Code Inspect Box -->
+            <div class="code-box" id="code-inspect-box">
+                <div class="code-header">
+                    <div class="code-dots">
+                        <div class="dot dot-red"></div>
+                        <div class="dot dot-yellow"></div>
+                        <div class="dot dot-green"></div>
+                    </div>
+                    <span>hello_world.html</span>
+                </div>
+                <div class="code-body">
+                    <pre><code><span class="code-tag">&lt;!DOCTYPE html&gt;</span>
+<span class="code-tag">&lt;html</span> <span class="code-attr">lang</span>=<span class="code-string">"en"</span><span class="code-tag">&gt;</span>
+  <span class="code-tag">&lt;head&gt;</span>
+    <span class="code-tag">&lt;title&gt;</span>Hello World<span class="code-tag">&lt;/title&gt;</span>
+  <span class="code-tag">&lt;/head&gt;</span>
+  <span class="code-tag">&lt;body&gt;</span>
+    <span class="code-tag">&lt;h1&gt;</span><span class="code-keyword">Hello, World!</span><span class="code-tag">&lt;/h1&gt;</span>
+  <span class="code-tag">&lt;/body&gt;</span>
+<span class="code-tag">&lt;/html&gt;</span></code></pre>
+                </div>
+            </div>
+
+            <!-- Real-time Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">FPS Performance</span>
+                        <span class="stat-value" id="fps-val">60 FPS</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Local Time</span>
+                        <span class="stat-value" id="clock-val">00:00:00</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-palette"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Current Aura</span>
+                        <span class="stat-value" id="theme-val">Aurora</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check" style="color: var(--accent-3);"></i>
+        <span id="toast-msg">Action executed successfully!</span>
+    </div>
+
+    <!-- Interactive Script -->
+    <script>
+        // 1. 3D Tilt Effect on Mouse Movement
+        const card = document.getElementById('card');
+        const container = document.querySelector('.perspective-container');
+
+        container.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            const rotateX = (-y / rect.height) * 14;
+            const rotateY = (x / rect.width) * 14;
+
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        });
+
+        // 2. Interactive Canvas Particles
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let particles = [];
+        let mouse = { x: null, y: null };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, speedX, speedY, size, color) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.vx = speedX || (Math.random() - 0.5) * 0.8;
+                this.vy = speedY || (Math.random() - 0.5) * 0.8;
+                this.size = size || Math.random() * 2 + 1;
+                this.alpha = Math.random() * 0.6 + 0.2;
+                this.color = color || 'rgba(255, 255, 255, ';
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color + this.alpha + ')';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ffffff';
+                ctx.fill();
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.min(Math.floor(window.innerWidth / 15), 80);
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // 3. Sparkle Explosion on Click or Button Press
+        function createSparkles(x, y) {
+            for (let i = 0; i < 24; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 2;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+                const size = Math.random() * 4 + 2;
+                const p = new Particle(x, y, vx, vy, size, 'rgba(0, 223, 216, ');
+                
+                // Fade particle out faster
+                const fadeInterval = setInterval(() => {
+                    p.alpha -= 0.03;
+                    if (p.alpha <= 0) {
+                        clearInterval(fadeInterval);
+                        const index = particles.indexOf(p);
+                        if (index > -1) particles.splice(index, 1);
+                    }
+                }, 30);
+                particles.push(p);
+            }
+        }
+
+        window.addEventListener('click', (e) => {
+            createSparkles(e.clientX, e.clientY);
+        });
+
+        document.getElementById('btn-interact').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const rect = e.target.getBoundingClientRect();
+            createSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            showToast("✨ Magic sparkles deployed!");
+        });
+
+        // 4. Code Inspect Toggle
+        const codeBox = document.getElementById('code-inspect-box');
+        document.getElementById('btn-toggle-code').addEventListener('click', (e) => {
+            e.stopPropagation();
+            codeBox.classList.toggle('show');
+            const isOpen = codeBox.classList.contains('show');
+            showToast(isOpen ? "💻 Code Inspector Opened" : "🙈 Code Inspector Hidden");
+        });
+
+        // 5. Copy Code Snippet
+        document.getElementById('btn-copy').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const snippet = `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>Hello World</title>\n</head>\n<body>\n  <h1>Hello, World!</h1>\n</body>\n</html>`;
+            navigator.clipboard.writeText(snippet).then(() => {
+                showToast("📋 HTML snippet copied to clipboard!");
+            }).catch(() => {
+                showToast("📋 HTML snippet copied!");
+            });
+        });
+
+        // 6. Theme Switching
+        const themeBtns = document.querySelectorAll('.theme-btn');
+        const themeVal = document.getElementById('theme-val');
+
+        themeBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                themeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const theme = btn.getAttribute('data-set');
+                if (theme === 'aurora') {
+                    document.documentElement.removeAttribute('data-theme');
+                    themeVal.innerText = 'Aurora';
+                } else {
+                    document.documentElement.setAttribute('data-theme', theme);
+                    themeVal.innerText = theme.charAt(0).toUpperCase() + theme.slice(1);
+                }
+
+                showToast(`🎨 Theme changed to ${themeVal.innerText}`);
+            });
+        });
+
+        // 7. Live Clock
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock-val').innerText = `${hours}:${minutes}:${seconds}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 8. Typewriter Effect Subtitle Loop
+        const phrases = [
+            "stunning glassmorphic visual aesthetics.",
+            "smooth 3D perspective physics.",
+            "dynamic reactive particle animations.",
+            "clean responsive modern code."
+        ];
+        let phraseIdx = 0;
+        let charIdx = 0;
+        let isDeleting = false;
+        const typewriterEl = document.getElementById('typewriter');
+
+        function typeLoop() {
+            const currentPhrase = phrases[phraseIdx];
+            
+            if (isDeleting) {
+                typewriterEl.innerText = currentPhrase.substring(0, charIdx - 1);
+                charIdx--;
+            } else {
+                typewriterEl.innerText = currentPhrase.substring(0, charIdx + 1);
+                charIdx++;
+            }
+
+            let typeSpeed = isDeleting ? 40 : 80;
+
+            if (!isDeleting && charIdx === currentPhrase.length) {
+                typeSpeed = 2000; // Pause at end of word
+                isDeleting = true;
+            } else if (isDeleting && charIdx === 0) {
+                isDeleting = false;
+                phraseIdx = (phraseIdx + 1) % phrases.length;
+                typeSpeed = 500;
+            }
+
+            setTimeout(typeLoop, typeSpeed);
+        }
+        typeLoop();
+
+        // 9. Toast Notification System
+        let toastTimeout;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.innerText = msg;
+            toast.classList.add('show');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
